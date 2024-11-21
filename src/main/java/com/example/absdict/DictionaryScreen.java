@@ -1,14 +1,17 @@
+
 package com.example.absdict;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class DictionaryScreen extends BorderPane {
     private ListView<HBox> searchResults;  // ListView for search results
@@ -120,36 +123,93 @@ public class DictionaryScreen extends BorderPane {
         }
     }
 
+    // Function to fetch word details (definitions, synonyms, and antonyms)
+    public String search_db(String word) {
+        StringBuilder result = new StringBuilder();
+        try {
+            // Define API keys and references
+            String dictionaryKey = "30178a37-7bf8-495a-8790-ce97e64b1dd0"; // Replace with your actual Dictionary API key
+            String thesaurusApiKey = "vGqqiS8iq0qdNfdo07tJDw==cD30DZ1ZM5qztRyT"; // Replace with your actual Thesaurus API key
+            String ref = "collegiate"; // Example dictionary reference
 
-    public static String search_db(String wordToSearch) {
+            // Fetch and display definitions from Dictionary API
+            String dictionaryUrl = "https://dictionaryapi.com/api/v3/references/" + ref + "/json/" + word + "?key=" + dictionaryKey;
+            URL dictUrl = new URL(dictionaryUrl);
+            HttpURLConnection dictConnection = (HttpURLConnection) dictUrl.openConnection();
+            dictConnection.setRequestMethod("GET");
 
-        String url = "jdbc:sqlite:dict.db";
+            int responseCode = dictConnection.getResponseCode();
+            String line;
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(dictConnection.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                while ((line = in.readLine()) != null) {
+                    response.append(line);
+                }
+                in.close();
 
-        // SQL query to fetch the word's definition
-        String sql = "SELECT definition FROM words WHERE LOWER(word) = ?";
+                // Parse and display definitions
+                JSONArray jsonArray = new JSONArray(response.toString());
+                if (jsonArray.length() > 0 && jsonArray.get(0) instanceof JSONObject) {
+                    JSONObject definition = jsonArray.getJSONObject(0);
 
-        try (Connection conn = DriverManager.getConnection(url);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                    result.append("Definitions:\n");
+                    if (definition.has("shortdef")) {
+                        JSONArray shortDefs = definition.getJSONArray("shortdef");
+                        for (int i = 0; i < shortDefs.length(); i++) {
+                            result.append("- " + shortDefs.getString(i) + "\n");
+                        }
+                    }
+                } else {
+                    result.append("No definitions found.\n");
+                }
+            } else {
+                result.append("Failed to fetch definitions. Response Code: " + responseCode + "\n");
+            }
 
-            // Set the query parameter (convert input to lowercase for case-insensitive match)
-            pstmt.setString(1, wordToSearch.toLowerCase());
+            // Fetch and display synonyms and antonyms from Thesaurus API
+            String thesaurusUrl = "https://api.api-ninjas.com/v1/thesaurus?word=" + word;
+            URL thesUrl = new URL(thesaurusUrl);
+            HttpURLConnection thesConnection = (HttpURLConnection) thesUrl.openConnection();
+            thesConnection.setRequestProperty("accept", "application/json");
+            thesConnection.setRequestProperty("X-Api-Key", thesaurusApiKey);
 
-            // Execute the query
-            ResultSet rs = pstmt.executeQuery();
+            BufferedReader thesReader = new BufferedReader(new InputStreamReader(thesConnection.getInputStream()));
+            StringBuilder thesResponse = new StringBuilder();
+            while ((line = thesReader.readLine()) != null) {
+                thesResponse.append(line);
+            }
+            thesReader.close();
 
-            // Return the definition if the word is found
-            if (rs.next()) {
-                return rs.getString("definition");
+            // Parse and display synonyms and antonyms
+            JSONObject thesaurusResponse = new JSONObject(thesResponse.toString());
+
+            // Synonyms (limit to 5)
+            if (thesaurusResponse.has("synonyms")) {
+                JSONArray synonyms = thesaurusResponse.getJSONArray("synonyms");
+                if (synonyms.length() > 0) {
+                    result.append("\nSynonyms:\n");
+                    for (int i = 0; i < Math.min(synonyms.length(), 5); i++) {
+                        result.append("- " + synonyms.getString(i) + "\n");
+                    }
+                }
+            }
+
+            // Antonyms (limit to 5)
+            if (thesaurusResponse.has("antonyms")) {
+                JSONArray antonyms = thesaurusResponse.getJSONArray("antonyms");
+                if (antonyms.length() > 0) {
+                    result.append("\nAntonyms:\n");
+                    for (int i = 0; i < Math.min(antonyms.length(), 5); i++) {
+                        result.append("- " + antonyms.getString(i) + "\n");
+                    }
+                }
             }
 
         } catch (Exception e) {
-            e.printStackTrace(); // Print any exception details
+            e.printStackTrace();
+            return null;
         }
-
-        return null; // Return null if no result is found
+        return result.toString();
     }
-
-
-
 }
-
