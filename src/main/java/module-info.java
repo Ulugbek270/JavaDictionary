@@ -5,8 +5,6 @@ module com.example.absdict {
     requires org.json;
     requires org.slf4j;
 
-
-
     opens com.example.absdict to javafx.fxml;
     exports com.example.absdict;
 }
