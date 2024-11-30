@@ -11,9 +11,10 @@ public class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        showRegistrationScreen();
+        showRegistrationScreen();  // Показать экран регистрации по умолчанию
     }
 
+    // Показать экран регистрации
     private void showRegistrationScreen() {
         RegistrationScreen registrationScreen = new RegistrationScreen(this);
         Scene scene = new Scene(registrationScreen, 700, 500);
@@ -22,6 +23,15 @@ public class MainApp extends Application {
         primaryStage.show();
     }
 
+    // Показать экран с логином
+    public void showLoginScreen() {
+        LoginScreen loginScreen = new LoginScreen(this);  // Создаем экран логина
+        Scene scene = new Scene(loginScreen, 700, 500);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Dictionary Login");
+    }
+
+    // Показать основной экран словаря
     public void showDictionaryScreen(String username) {
         this.username = username;
         DictionaryScreen dictionaryScreen = new DictionaryScreen(this, username);

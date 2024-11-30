@@ -292,4 +292,3 @@ public class DictionaryScreen extends BorderPane {
         }
         return result.toString();
     }    }
-
