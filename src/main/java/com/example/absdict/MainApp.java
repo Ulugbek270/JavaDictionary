@@ -33,11 +33,11 @@ public class MainApp extends Application {
 
     // Show the dictionary screen after the user logs in
     public void showDictionaryScreen(String username) {
-        this.username = username; // Store the username of the logged-in user
-        DictionaryScreen dictionaryScreen = new DictionaryScreen( username); // Create dictionary screen with username
-        Scene scene = new Scene(dictionaryScreen, 700, 500); // Create scene for dictionary screen with size
-        primaryStage.setScene(scene); // Set the scene to primary window
-        primaryStage.setTitle("Gonzo Dictionary"); // Set title for the dictionary window
+        this.username = username;
+        DictionaryScreen dictionaryScreen = new DictionaryScreen( username);
+        Scene scene = new Scene(dictionaryScreen, 700, 500);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Gonzo Dictionary");
     }
 
     public static void main(String[] args) {
