@@ -1,8 +1,3 @@
-
-
-
-
-
 package com.example.absdict;
 
 import javafx.application.Platform;
@@ -10,10 +5,9 @@ import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Color;
 
 import java.sql.*;
+
 
 public class DictionaryScreen extends BorderPane {
     private ListView<HBox> searchResults; // ListView for search results
@@ -36,6 +30,8 @@ public class DictionaryScreen extends BorderPane {
 
         HBox topBar = new HBox();
         topBar.setPadding(new Insets(10));
+        topBar.setSpacing(10); // Adds spacing between elements
+
         topBar.setStyle("-fx-background-color: #4CAF50;");
 
         TextField searchField = new TextField();
@@ -213,5 +209,4 @@ public class DictionaryScreen extends BorderPane {
         }
     }
 }
-
 
